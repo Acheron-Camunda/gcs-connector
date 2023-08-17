@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import com.acheron.connector.GCSRequest;
 import com.acheron.connector.GCSResponse;
 import com.acheron.connector.GoogleCloudStorageFunction;
+import com.acheron.connector.exception.DirectoryNotFoundException;
 import com.acheron.connector.exception.InvalidCredentialFileException;
 import com.acheron.connector.exception.ObjectNotFoundException;
 import com.acheron.connector.model.Operation;
@@ -169,10 +170,8 @@ class GCSConnectorTest {
 		gcsRequest.getOperation().setOperationType(OperationType.DOWNLOAD_OBJECT.toString());
 		GCSResponse expectedGcsResponse = new GCSResponse();
 		
-		String downloadObjectPath = gcsRequest.getStorageOptions().getDownlodObjectPath();
-		
-		String[] parts=downloadObjectPath.split("/");
-		String objectName = parts[parts.length - 1];
+		String objectName = getObjectNam(gcsRequest.getStorageOptions().getDownlodObjectPath());
+
 		
 		expectedGcsResponse.setResponse("File " + objectName
 				+ " Downloaded to " + gcsRequest.getStorageOptions().getDownloadFileDirectory());
@@ -282,15 +281,21 @@ class GCSConnectorTest {
 
 		// then
 		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(InvalidCredentialFileException.class)
-		.hasMessageContaining("Invalid credentials in provided the JSON File");
+		.hasMessageContaining("Invalid credentials in the provided JSON File");
 
 		
 	}
+	
+	
+	/**
+     * Test method to demonstrate handling scenarios when the specified directory does not exist.
+	 */
 	@Test
-	void testWithFileAlreadyExists() throws JsonProcessingException {
+	void testWithDirectoryNotFound() throws JsonProcessingException {
 		// given
 		GCSRequest gcsRequest = getGCSrequest();
 		gcsRequest.getOperation().setOperationType(OperationType.DOWNLOAD_OBJECT.toString());
+		gcsRequest.getStorageOptions().setDownloadFileDirectory("src/Invalid-directory");
 		
 		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
 		
@@ -299,7 +304,33 @@ class GCSConnectorTest {
 				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
 
 		// then
-		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(FileAlreadyExistsException.class);
+		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(DirectoryNotFoundException.class)
+		.hasMessageContaining("The provided directory " + gcsRequest.getStorageOptions().getDownloadFileDirectory() + " is not found in the file system");
+				
+	}
+
+	
+	/**
+     * Test method to demonstrate handling scenarios when a file with the same name already exists in the provided download directory.
+	 */
+	@Test
+	void testWithFileAlreadyExists() throws JsonProcessingException {
+		// given
+		GCSRequest gcsRequest = getGCSrequest();
+		gcsRequest.getOperation().setOperationType(OperationType.DOWNLOAD_OBJECT.toString());
+		
+		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
+      
+		String objectName = getObjectNam(gcsRequest.getStorageOptions().getDownlodObjectPath());
+		
+		// when
+		TestConnectorContext context = OutboundConnectorContextBuilder.create()
+				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
+
+		// then
+		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(FileAlreadyExistsException.class)
+		.hasMessageContaining("File with name " + objectName + " already exists in directory " + gcsRequest.getStorageOptions().getDownloadFileDirectory());
+		
 
 		
 	}
@@ -319,8 +350,6 @@ class GCSConnectorTest {
 
 	}
 	
-	
-
 	GCSRequest getGCSRequestWithNull() {
 
 		Operation operation = new Operation();
@@ -329,6 +358,12 @@ class GCSConnectorTest {
 		return new GCSRequest(operation, storage);
 	}
 
+	
+	String getObjectNam(String downloadObjectPath) {
+		String[] parts=downloadObjectPath.split("/");
+		return  parts[parts.length - 1];
+		
+	}
 
 
 }

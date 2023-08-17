@@ -43,7 +43,7 @@ A Camunda outbound connector to connect with the Google Cloud Storage and perfor
 | `operationType`         | Type of operation you intend to perform with the GCS bucket      | Upload/Download/Delete File        |
 | `bucketName`            | Name of the GCS bucket that you want to perform operations with  | `camunda-connector`                |
 | `uploadFilePath`        | Absolute path to the file you want to upload                     | `/gcs/SpringBoot.png`              |
-| `uploadFolderName`      | Folder name within the bucket where the uploaded file will be placed.| `/your-folder/sub-folder`       |
+| `uploadFolderName`      | Folder name within the bucket where the uploaded file will be placed.| `/your-folder/sub-folder/`       |
 | `downloadFileDirectory` | Directory to save the downloaded file                            | `/gcs/`                            |
 | `downloadObjectPath`    | Absolute path of the object to be downloaded from the bucket.    | `/your-folder/sub-folder/SpringBoot.png`|
 | `deleteObjectPath`      | Absolute path of the object to be deleted from GCS bucket        | `/your-folder/sub-folder/SpringBoot.png`|
@@ -95,7 +95,7 @@ docker build -t gcs-connector .
 
 ## Sample BPMN
 
-You can find the sample BPMN file in the 'bpmn' folder.
+You can find the sample BPMN file in the `bpmn` folder of this directory.
 
 ## Example Process
 <img src="assets/example-process.png" alt="example-process" width="600" />

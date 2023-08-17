@@ -15,7 +15,7 @@
         <zeebe:ioMapping>
           <zeebe:input source="test-upload/sub-folder/SpringBoot.png" target="storageOptions.deleteObjectName" />
           <zeebe:input source="DOWNLOAD_OBJECT" target="operation.operationType" />
-          <zeebe:input source="/gcs/" target="storageOptions.downloadFileDirectory" />
+          <zeebe:input source="/gcs/download/" target="storageOptions.downloadFileDirectory" />
           <zeebe:input source="camunda-connector" target="storageOptions.bucketName" />
           <zeebe:input source="upload/SpringBoot.png" target="storageOptions.downlodObjectPath" />
         </zeebe:ioMapping>
