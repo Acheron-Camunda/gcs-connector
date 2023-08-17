@@ -14,8 +14,8 @@ services:
   
     volumes:
       - type: bind
-        source: C:\GCS\
-        target: /gcs
+        source: provide directory in local storage
+        target: provide directory in docker container
     networks:
       - camunda-platform
 

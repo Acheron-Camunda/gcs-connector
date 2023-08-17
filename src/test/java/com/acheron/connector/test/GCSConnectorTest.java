@@ -299,7 +299,7 @@ class GCSConnectorTest {
 				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
 
 		// then
-		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(IOException.class);
+		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(FileAlreadyExistsException.class);
 
 		
 	}
