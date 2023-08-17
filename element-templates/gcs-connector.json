@@ -1,0 +1,213 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "Google Cloud Storage Connector",
+  "id": "com.acheron.connector.gcs.v1",
+  "description": "Manage files on google cloud storage",
+  "version": 1,
+  "documentationRef": "https://docs.camunda.io/docs/components/connectors/out-of-the-box-connectors/available-connectors-overview/",
+  "icon": {
+    "contents": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAbFBMVEX///+uy/pmnfZChfSryfrY5vz3+v7c6Pxal/Zjm/aMtPiwzfp4pvc9gvTM3vzu8/7n7v2hvfkvfPNTkPVHiPRfmPZPjfVknPa60/vr8v5DhvRTk/W20Pr4+v7G2fuHsfjK3Px5qfcYdfPS4vzm86/OAAADxElEQVR4nO3dcXOaMBzG8RIjwijFNRBU1Ln1/b/HtXUqBMJoTm/8nj3fv3u9fA5oajTx6YkxxhhjjDHGGGOMMcYYY4wxxhhj7B9WRJnbcTnH9t97bScJV03llPyI9PyKnl9zp9fVNGGinNJvWTS/sud84bSDF1p0YZ6gC8sKXWjghRX8XarQhRZe2KAL8xpdWCp0oYEXVvBChS608MJGkNB9pTtNmIoR6uy02hbX1m8bD7IrLJUQoc76gyw2g8Su0AgR6v3gkN6GiF1hJUSYecY0ROwKlQyhjn2DGrhRO0IrQ6hfvIMq/iJshAi9l/D9Io4LUxnC4T8z55a9i9gWlur+wuCVan/6ODKq9ajQ3F+ojy9h9e+22+/0P4ZDD2JLmFcPEBaTfle//t12B+FCoQstvLCBF6bowlKhCw268DJX4AoXCl1oHyJ8RPo0MqqtX9jIEW5GRjXyf2kqRhhFI6N68QpLJUeoRz7w0x/BRWgECSP/bbryvsa/zRUShNo3wsPAD1+uoZIk9N6ne/9am5UlHL6KcTayXtoIE0Z6717GuP9ntC1MpQk/FvaPp9uqx3HvW9s5C0slT+iscnl/6iw0IoXT+hS25wpM4UKhCy28sIEXpujCUqELDbqwO1cgChcKXWjhhQ28sEYXuo8hntB9DPGEvYHCCdNA4dIkbvPcf/izN06znCQ8FL3iQzy/DnF/oIdJQsYYY4wxxhhj7P9Iymv8uFj3mvYaX8w6jXp1+zVtnUbOWlvvFKUcbTXxPzwnqkEX7uBPUbLwwgTufQtXWKMLS7z3nhyhQRfmFbpwB/gOaVdo4YUJvLBGF358TBFbaEQJOy90fXWFnx9TFCLU0aa132KTje+3aM0VQoR688U9M7e5QoZQrwdGFA9t7HKEiRBhwN61P49hLUMYtP/wOldIEIbsIb3NFQKEYfuAr3OFAGHYXu7rXDF/Yeh+/MV1+9PshaeRUY2cqXCZK3DPxXh/DBW6sIQXGnhhhS7cKXShhRcm6MLb9idU4W2rLOrZl+YhwjmdX1o9RviIws6g3Sk5wrBzhK0kYdBZ0IkgYdh53rUkYciZ7O1jFQQI9X7ws3dj5+obWcJIR1/9boRKmPDjmKi3dev7LbbLYd9VqMQJv/gdJVaicGJnYQIvrNGF3SN4EIUGXljBCxW60MILE3hhjS50jmsDFBp4YQUvdAcKJ3QfQzyhe1wbntB9DCcLm8pppvsPn91xVhN3dhVR5nZczrFjb5xR6PtFjDHGGGOMMcYYY4wxxhhjjDHGGGN36TeGk9jiud4ntgAAAABJRU5ErkJggg=="
+  },
+  "category": {
+    "id": "connectors",
+    "name": "Connectors"
+  },
+  "appliesTo": [
+    "bpmn:Task"
+  ],
+  "elementType": {
+    "value": "bpmn:ServiceTask"
+  },
+  "groups": [
+    {
+      "id": "operation",
+      "label": "Select Operation Type"
+    },
+    {
+      "id": "storageOptions",
+      "label": "Cloud Storage Details"
+    },
+    {
+      "id": "output",
+      "label": "Output Mapping"
+    },
+    {
+      "id": "errors",
+      "label": "Error Handling"
+    }
+  ],
+  "properties": [
+    {
+      "type": "Hidden",
+      "value": "com.acheron.connector:gcs:1",
+      "binding": {
+        "type": "zeebe:taskDefinition:type"
+      }
+    },
+    {
+      "id": "operationType",
+      "group": "operation",
+      "type": "Dropdown",
+      "value": "UPLOAD_OBJECT",
+      "choices": [
+        {
+          "name": "Upload file",
+          "value": "UPLOAD_OBJECT"
+        },
+        {
+          "name": "Download file",
+          "value": "DOWNLOAD_OBJECT"
+        },
+        {
+          "name": "Delete file",
+          "value": "DELETE_OBJECT"
+        }
+      ],
+      "binding": {
+        "type": "zeebe:input",
+        "name": "operation.operationType",
+        "key": "operation.operationType"
+      },
+      "constraints": {
+        "notEmpty": true
+      }
+    },
+    {
+      "label": "Upload file path",
+      "description": "Provide an absolute path to file present in file system (e.g./gcs/upload/file.txt)",
+      "group": "storageOptions",
+      "type": "String",
+      "feel": "optional",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "storageOptions.uploadFilePath"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "equals": "UPLOAD_OBJECT"
+      }
+    },
+    {
+      "label": "Download file directory",
+      "description": "Provide a directory to download the object (e.g. /gcs/download/)",
+      "group": "storageOptions",
+      "type": "String",
+      "feel": "optional",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "storageOptions.downloadFileDirectory"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "equals": "DOWNLOAD_OBJECT"
+      }
+    },
+    {
+      "label": "Bucket Name",
+      "description": "Enter the name of your GCS bucket",
+      "group": "storageOptions",
+      "type": "String",
+      "feel": "optional",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "storageOptions.bucketName"
+      },
+      "constraints": {
+        "notEmpty": true
+      }
+    },
+    {
+      "label": "Folder Name",
+      "description": "Provide a folder name to upload the object in GCS bucket (e.g folder/sub-folder/)",
+      "group": "storageOptions",
+      "type": "String",
+      "feel": "optional",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "storageOptions.uploadFolderName"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "equals": "UPLOAD_OBJECT"
+      }
+    },
+    {
+      "label": "Object Path",
+      "description": "Object path in bucket with extension (eg. folder/file.txt (or) file.pdf (if it is directly present in bucket)) ",
+      "group": "storageOptions",
+      "type": "String",
+      "feel": "optional",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "storageOptions.deleteObjectPath"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "equals": "DELETE_OBJECT"
+      }
+    },
+    {
+      "label": "Object Path",
+      "description": "Absolute path to Object in bucket with extension (eg. folder/sub-folder/file.txt (or) file.pdf (if it is directly present in bucket)) ",
+      "group": "storageOptions",
+      "type": "String",
+      "feel": "optional",
+      "binding": {
+        "type": "zeebe:input",
+        "name": "storageOptions.downlodObjectPath"
+      },
+      "constraints": {
+        "notEmpty": true
+      },
+      "condition": {
+        "property": "operationType",
+        "equals": "DOWNLOAD_OBJECT"
+      }
+    },
+    
+    {
+      "label": "Result Variable",
+      "description": "Name of variable to store the response in",
+      "group": "output",
+      "type": "String",
+      "binding": {
+        "type": "zeebe:taskHeader",
+        "key": "resultVariable"
+      }
+    },
+    {
+      "label": "Result Expression",
+      "description": "Expression to map the response into process variables",
+      "group": "output",
+      "type": "Text",
+      "feel": "required",
+      "binding": {
+        "type": "zeebe:taskHeader",
+        "key": "resultExpression"
+      }
+    },
+    {
+      "label": "Error Expression",
+      "description": "Expression to handle errors. Details in the <a href=\"https://docs.camunda.io/docs/components/connectors/use-connectors/\" target=\"_blank\">documentation</a>.",
+      "group": "errors",
+      "type": "Text",
+      "feel": "required",
+      "binding": {
+        "type": "zeebe:taskHeader",
+        "key": "errorExpression"
+      }
+    }
+  ]
+}

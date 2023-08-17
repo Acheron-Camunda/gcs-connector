@@ -1,0 +1,29 @@
+services:
+  gcs-connector:
+    image: gcs-connector:latest
+    container_name: GCSConnector
+
+    environment:
+      - ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS=zeebe:26500
+      - ZEEBE_CLIENT_SECURITY_PLAINTEXT=true
+      - CAMUNDA_CONNECTOR_POLLING_ENABLED=false
+      - CAMUNDA_CONNECTOR_WEBHOOK_ENABLED=false
+      - SPRING_MAIN_WEB-APPLICATION-TYPE=none
+      - OPERATE_CLIENT_ENABLED=false
+      - JSON_CREDENTIALS_FILEPATH=/gcs/credentials-key.json
+  
+    volumes:
+      - type: bind
+        source: C:\GCS\
+        target: /gcs
+    networks:
+      - camunda-platform
+
+networks:
+  camunda-platform:
+    external: true
+      
+
+
+
+        

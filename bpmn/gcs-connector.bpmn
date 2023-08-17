@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1n9fffs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.13.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+  <bpmn:process id="Process_GoogleCloudStorage" name="Google Cloud Storage" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Start">
+      <bpmn:outgoing>Flow_1lu7mkp</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1lu7mkp" sourceRef="StartEvent_1" targetRef="Activity_GoogleCloudStorage" />
+    <bpmn:endEvent id="Event_1qn7zhz" name="End">
+      <bpmn:incoming>Flow_16b83w6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_16b83w6" sourceRef="Activity_GoogleCloudStorage" targetRef="Event_1qn7zhz" />
+    <bpmn:serviceTask id="Activity_GoogleCloudStorage" name="Google Cloud Storage" zeebe:modelerTemplate="com.acheron.connector.gcs.v1" zeebe:modelerTemplateVersion="1" zeebe:modelerTemplateIcon="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAbFBMVEX///+uy/pmnfZChfSryfrY5vz3+v7c6Pxal/Zjm/aMtPiwzfp4pvc9gvTM3vzu8/7n7v2hvfkvfPNTkPVHiPRfmPZPjfVknPa60/vr8v5DhvRTk/W20Pr4+v7G2fuHsfjK3Px5qfcYdfPS4vzm86/OAAADxElEQVR4nO3dcXOaMBzG8RIjwijFNRBU1Ln1/b/HtXUqBMJoTm/8nj3fv3u9fA5oajTx6YkxxhhjjDHGGGOMMcYYY4wxxhhj7B9WRJnbcTnH9t97bScJV03llPyI9PyKnl9zp9fVNGGinNJvWTS/sud84bSDF1p0YZ6gC8sKXWjghRX8XarQhRZe2KAL8xpdWCp0oYEXVvBChS608MJGkNB9pTtNmIoR6uy02hbX1m8bD7IrLJUQoc76gyw2g8Su0AgR6v3gkN6GiF1hJUSYecY0ROwKlQyhjn2DGrhRO0IrQ6hfvIMq/iJshAi9l/D9Io4LUxnC4T8z55a9i9gWlur+wuCVan/6ODKq9ajQ3F+ojy9h9e+22+/0P4ZDD2JLmFcPEBaTfle//t12B+FCoQstvLCBF6bowlKhCw268DJX4AoXCl1oHyJ8RPo0MqqtX9jIEW5GRjXyf2kqRhhFI6N68QpLJUeoRz7w0x/BRWgECSP/bbryvsa/zRUShNo3wsPAD1+uoZIk9N6ne/9am5UlHL6KcTayXtoIE0Z6717GuP9ntC1MpQk/FvaPp9uqx3HvW9s5C0slT+iscnl/6iw0IoXT+hS25wpM4UKhCy28sIEXpujCUqELDbqwO1cgChcKXWjhhQ28sEYXuo8hntB9DPGEvYHCCdNA4dIkbvPcf/izN06znCQ8FL3iQzy/DnF/oIdJQsYYY4wxxhhj7P9Iymv8uFj3mvYaX8w6jXp1+zVtnUbOWlvvFKUcbTXxPzwnqkEX7uBPUbLwwgTufQtXWKMLS7z3nhyhQRfmFbpwB/gOaVdo4YUJvLBGF358TBFbaEQJOy90fXWFnx9TFCLU0aa132KTje+3aM0VQoR688U9M7e5QoZQrwdGFA9t7HKEiRBhwN61P49hLUMYtP/wOldIEIbsIb3NFQKEYfuAr3OFAGHYXu7rXDF/Yeh+/MV1+9PshaeRUY2cqXCZK3DPxXh/DBW6sIQXGnhhhS7cKXShhRcm6MLb9idU4W2rLOrZl+YhwjmdX1o9RviIws6g3Sk5wrBzhK0kYdBZ0IkgYdh53rUkYciZ7O1jFQQI9X7ws3dj5+obWcJIR1/9boRKmPDjmKi3dev7LbbLYd9VqMQJv/gdJVaicGJnYQIvrNGF3SN4EIUGXljBCxW60MILE3hhjS50jmsDFBp4YQUvdAcKJ3QfQzyhe1wbntB9DCcLm8pppvsPn91xVhN3dhVR5nZczrFjb5xR6PtFjDHGGGOMMcYYY4wxxhhjjDHGGGN36TeGk9jiud4ntgAAAABJRU5ErkJggg==">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="com.acheron.connector:gcs:1" />
+        <zeebe:ioMapping>
+          <zeebe:input source="test-upload/sub-folder/SpringBoot.png" target="storageOptions.deleteObjectName" />
+          <zeebe:input source="DOWNLOAD_OBJECT" target="operation.operationType" />
+          <zeebe:input source="/gcs/" target="storageOptions.downloadFileDirectory" />
+          <zeebe:input source="camunda-connector" target="storageOptions.bucketName" />
+          <zeebe:input source="upload/SpringBoot.png" target="storageOptions.downlodObjectPath" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1lu7mkp</bpmn:incoming>
+      <bpmn:outgoing>Flow_16b83w6</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_GoogleCloudStorage">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="158" y="142" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1qn7zhz_di" bpmnElement="Event_1qn7zhz">
+        <dc:Bounds x="422" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="430" y="142" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0pxokzt_di" bpmnElement="Activity_GoogleCloudStorage">
+        <dc:Bounds x="260" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1lu7mkp_di" bpmnElement="Flow_1lu7mkp">
+        <di:waypoint x="188" y="117" />
+        <di:waypoint x="260" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16b83w6_di" bpmnElement="Flow_16b83w6">
+        <di:waypoint x="360" y="117" />
+        <di:waypoint x="422" y="117" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
