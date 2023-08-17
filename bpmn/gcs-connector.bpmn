@@ -14,10 +14,9 @@
         <zeebe:taskDefinition type="com.acheron.connector:gcs:1" />
         <zeebe:ioMapping>
           <zeebe:input source="test-upload/sub-folder/SpringBoot.png" target="storageOptions.deleteObjectName" />
-          <zeebe:input source="DOWNLOAD_OBJECT" target="operation.operationType" />
-          <zeebe:input source="/gcs/download/" target="storageOptions.downloadFileDirectory" />
+          <zeebe:input source="DELETE_OBJECT" target="operation.operationType" />
           <zeebe:input source="camunda-connector" target="storageOptions.bucketName" />
-          <zeebe:input source="upload/SpringBoot.png" target="storageOptions.downlodObjectPath" />
+          <zeebe:input source="media/images/Springboot.png" target="storageOptions.deleteObjectPath" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders />
       </bpmn:extensionElements>
