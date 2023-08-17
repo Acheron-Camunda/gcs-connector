@@ -10,7 +10,7 @@ services:
       - CAMUNDA_CONNECTOR_WEBHOOK_ENABLED=false
       - SPRING_MAIN_WEB-APPLICATION-TYPE=none
       - OPERATE_CLIENT_ENABLED=false
-      - JSON_CREDENTIALS_FILEPATH=/gcs/credentials-key.json
+      - JSON_CREDENTIALS_FILEPATH= provide path in container to credentials JSON key
   
     volumes:
       - type: bind
