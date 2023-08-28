@@ -100,6 +100,10 @@ You can find the sample BPMN file in the `bpmn` folder of this directory.
 ## Example Process
 <img src="assets/example-process.png" alt="example-process" width="600" />
 
+## Contact
+If you have any questions, concerns, or suggestions regarding this connector, please feel free to contact us: camunda.support@acheron-tech.com
+
+
 
 
 
