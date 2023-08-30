@@ -97,8 +97,13 @@ docker build -t gcs-connector .
 
 You can find the sample BPMN file in the `bpmn` folder of this directory.
 
-## Example Process
-<img src="assets/example-process.png" alt="example-process" width="600" />
+## GCS Connector Resources
+
+| Content        | Link                                                                                                      |
+|----------------|-----------------------------------------------------------------------------------------------------------|
+| YouTube Video  | [How to Use GCS connector: A Developer's Walkthrough](https://www.youtube.com/watch?v=q4Pc4Wz6M7Q)        |
+| Blog Post      | [Using GCS Connector: A Step-by-Step Guide](https://blog.acheron-tech.com/google-cloud-storage-connector/)|
+
 
 ## Contact
 If you have any questions, concerns, or suggestions regarding this connector, please feel free to contact us: camunda.support@acheron-tech.com
