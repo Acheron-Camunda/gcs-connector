@@ -101,7 +101,7 @@ You can find the sample BPMN file in the `bpmn` folder of this directory.
 
 | Content        | Link                                                                                                      |
 |----------------|-----------------------------------------------------------------------------------------------------------|
-| YouTube Video  | [How to Use GCS connector: A Developer's Walkthrough](https://www.youtube.com/watch?v=q4Pc4Wz6M7Q)        |
+| YouTube Video  | [How to Use GCS connector: A Developer's Walkthrough]([https://www.youtube.com/watch?v=q4Pc4Wz6M7Q](https://www.youtube.com/playlist?list=PLKYpjK0JISJaJFhK9HLX4xfJZa31twQlR))        |
 | Blog Post      | [Using GCS Connector: A Step-by-Step Guide](https://blog.acheron-tech.com/google-cloud-storage-connector/)|
 
 
