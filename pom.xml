@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
 	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.acheron.connector</groupId>
 	<artifactId>google-cloud-storage</artifactId>
@@ -10,28 +11,20 @@
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		
 		<!-- connector SDK version -->
-		<version.connector-core>0.22.1</version.connector-core>
-		
-		
-		<version.google-cloud-storage>2.24.0</version.google-cloud-storage>
+		<version.connector-core>8.3.8</version.connector-core>
+		<version.google-cloud-storage>2.36.1</version.google-cloud-storage>
 		<version.lombok>1.18.28</version.lombok>
-		
 		<!-- test-dependences-version -->
 		<version.junit>5.10.0</version.junit>
 		<version.system-stubbs>2.0.2</version.system-stubbs>
 		<version.assertj>3.24.2</version.assertj>
-		
 		<plugin.version.maven-assembly-plugin>3.6.0</plugin.version.maven-assembly-plugin>
 	</properties>
 	<dependencies>
-	
-	    <!-- connector dependencies -->
-			
 		<dependency>
 			<groupId>io.camunda.connector</groupId>
-			<artifactId>connector-core</artifactId>
+			<artifactId>connector-runtime-core</artifactId>
 			<version>${version.connector-core}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -46,9 +39,6 @@
 			<artifactId>connector-test</artifactId>
 			<version>${version.connector-core}</version>
 		</dependency>
-		
-		
-		
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-storage</artifactId>
@@ -60,23 +50,18 @@
 			<version>${version.lombok}</version>
 			<scope>provided</scope>
 		</dependency>
-
-		
-		<!-- Test  dependencies -->
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<version>${version.junit}</version>
 			<scope>test</scope>
 		</dependency>
-
-        <dependency>
-            <groupId>uk.org.webcompere</groupId>
-            <artifactId>system-stubs-jupiter</artifactId>
-            <version>${version.system-stubbs}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>uk.org.webcompere</groupId>
+			<artifactId>system-stubs-jupiter</artifactId>
+			<version>${version.system-stubbs}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>

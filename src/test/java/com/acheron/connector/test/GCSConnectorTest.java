@@ -1,7 +1,6 @@
 package com.acheron.connector.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -59,7 +58,7 @@ class GCSConnectorTest {
 	public void setup() {
 
 		// stubbing the environment variable to system
-		environmentVariables.set("JSON_CREDENTIALS_FILEPATH", "C:/GCS/credentials-key.json");
+		environmentVariables.set("JSON_CREDENTIALS_FILEPATH", "C:\\CloudAI\\credentials.json");
 
 		// Initialize the mock objects
 		mockStorage = Mockito.mock(Storage.class);
