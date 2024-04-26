@@ -18,7 +18,7 @@ A Camunda outbound connector to connect with the Google Cloud Storage and perfor
 
 - Make sure to define the complete path of the JSON key file as an environment variable  to the connector application
 
-- The JSON file is formatted as follows
+- The JSON file follows this formatting:
 ```json
 {
     "type": "service_account",
@@ -50,7 +50,7 @@ A Camunda outbound connector to connect with the Google Cloud Storage and perfor
 
 **Note:**  The GCS connector doesn't require secret inputs. Instead, it operates by taking the path of the credential JSON key file as an environment variable.
 
-In Modeler the configuration for each operation looks like this  
+The configuration for each operation in Modeler appears as follows:
 ### Upload file
 <img src="assets/upload.png" alt="upload image" width="400" />
 
@@ -70,7 +70,7 @@ mvn clean package
 Build an image by using the Dockerfile 
 
 ```Dockerfile
-FROM camunda/connectors:0.22.1
+FROM camunda/connectors:8.5.0
 
 COPY target/google-cloud-storage-jar-with-dependencies.jar /opt/app/
 ```

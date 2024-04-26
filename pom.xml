@@ -9,17 +9,18 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>google-cloud-storage</name>
 	<properties>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<!-- connector SDK version -->
-		<version.connector-core>8.3.8</version.connector-core>
-		<version.google-cloud-storage>2.36.1</version.google-cloud-storage>
-		<version.lombok>1.18.28</version.lombok>
+		<version.connector-core>8.5.0</version.connector-core>
+		<version.google-cloud-storage>2.37.0</version.google-cloud-storage>
+		<version.lombok>1.18.30</version.lombok>
 		<!-- test-dependences-version -->
-		<version.junit>5.10.0</version.junit>
-		<version.system-stubbs>2.0.2</version.system-stubbs>
-		<version.assertj>3.24.2</version.assertj>
-		<plugin.version.maven-assembly-plugin>3.6.0</plugin.version.maven-assembly-plugin>
+		<version.junit>5.10.2</version.junit>
+		<version.system-stubbs>2.1.6</version.system-stubbs>
+		<version.assertj>3.25.3</version.assertj>
+		<version.mockito>5.2.0</version.mockito>
+		<plugin.version.maven-assembly-plugin>3.7.1</plugin.version.maven-assembly-plugin>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -68,6 +69,14 @@
 			<version>${version.assertj}</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-inline -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<version>${version.mockito}</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<finalName>google-cloud-storage</finalName>
