@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1n9fffs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.13.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1n9fffs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.22.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0">
   <bpmn:process id="Process_GoogleCloudStorage" name="Google Cloud Storage" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Start">
       <bpmn:outgoing>Flow_1lu7mkp</bpmn:outgoing>
@@ -13,10 +13,10 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="com.acheron.connector:gcs:1" />
         <zeebe:ioMapping>
-          <zeebe:input source="test-upload/sub-folder/SpringBoot.png" target="storageOptions.deleteObjectName" />
-          <zeebe:input source="DELETE_OBJECT" target="operation.operationType" />
-          <zeebe:input source="camunda-connector" target="storageOptions.bucketName" />
-          <zeebe:input source="media/images/Springboot.png" target="storageOptions.deleteObjectPath" />
+          <zeebe:input source="UPLOAD_OBJECT" target="operation.operationType" />
+          <zeebe:input target="storageOptions.uploadFilePath" />
+          <zeebe:input target="storageOptions.bucketName" />
+          <zeebe:input target="storageOptions.uploadFolderName" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders />
       </bpmn:extensionElements>
