@@ -9,19 +9,32 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>google-cloud-storage</name>
 	<properties>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.release>21</maven.compiler.release>
 		<!-- connector SDK version -->
-		<version.connector-core>8.5.0</version.connector-core>
-		<version.google-cloud-storage>2.37.0</version.google-cloud-storage>
-		<version.lombok>1.18.30</version.lombok>
+		<version.connector-core>8.8.8</version.connector-core>
+		<version.google-cloud-bom>26.78.0</version.google-cloud-bom>
+		<version.lombok>1.18.44</version.lombok>
 		<!-- test-dependences-version -->
-		<version.junit>5.10.2</version.junit>
-		<version.system-stubbs>2.1.6</version.system-stubbs>
-		<version.assertj>3.25.3</version.assertj>
-		<version.mockito>5.2.0</version.mockito>
-		<plugin.version.maven-assembly-plugin>3.7.1</plugin.version.maven-assembly-plugin>
+		<version.junit>6.0.3</version.junit>
+		<version.system-stubbs>2.1.8</version.system-stubbs>
+		<version.assertj>3.27.7</version.assertj>
+		<version.mockito>5.23.0</version.mockito>
+		<plugin.version.maven-compiler-plugin>3.14.1</plugin.version.maven-compiler-plugin>
+		<plugin.version.maven-enforcer-plugin>3.5.0</plugin.version.maven-enforcer-plugin>
+		<plugin.version.maven-shade-plugin>3.6.1</plugin.version.maven-shade-plugin>
+		<plugin.version.maven-surefire-plugin>3.5.5</plugin.version.maven-surefire-plugin>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>${version.google-cloud-bom}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>io.camunda.connector</groupId>
@@ -39,11 +52,11 @@
 			<groupId>io.camunda.connector</groupId>
 			<artifactId>connector-test</artifactId>
 			<version>${version.connector-core}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-storage</artifactId>
-			<version>${version.google-cloud-storage}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -69,10 +82,15 @@
 			<version>${version.assertj}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-inline -->
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
+			<artifactId>mockito-core</artifactId>
+			<version>${version.mockito}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
 			<version>${version.mockito}</version>
 			<scope>test</scope>
 		</dependency>
@@ -82,21 +100,89 @@
 		<finalName>google-cloud-storage</finalName>
 		<plugins>
 			<plugin>
-				<version>${plugin.version.maven-assembly-plugin}</version>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>${plugin.version.maven-enforcer-plugin}</version>
+				<executions>
+					<execution>
+						<id>enforce-java-and-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[21,22)</version>
+								</requireJavaVersion>
+								<requireMavenVersion>
+									<version>[3.9,)</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${plugin.version.maven-compiler-plugin}</version>
+				<configuration>
+					<release>${maven.compiler.release}</release>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${version.lombok}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${plugin.version.maven-surefire-plugin}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>${plugin.version.maven-shade-plugin}</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
+						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+							</transformers>
+							<relocations>
+								<relocation>
+									<pattern>com.google.api</pattern>
+									<shadedPattern>com.acheron.shaded.google.api</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.auth</pattern>
+									<shadedPattern>com.acheron.shaded.google.auth</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.cloud</pattern>
+									<shadedPattern>com.acheron.shaded.google.cloud</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.common</pattern>
+									<shadedPattern>com.acheron.shaded.google.common</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson</pattern>
+									<shadedPattern>com.acheron.shaded.fasterxml.jackson</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,6 +1,7 @@
 package com.acheron.connector.model;
 
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 import jakarta.validation.Valid;
 
@@ -54,7 +55,8 @@ public class RequestOptions {
 	 * This field is optional, and it can be left empty if not used.
 	 */
 	@Valid
-	private String downlodObjectPath;
+	@JsonAlias("downlodObjectPath")
+	private String downloadObjectPath;
 
 	/**
      * The name of the Google Cloud Storage bucket for performing operations.
@@ -73,6 +75,15 @@ public class RequestOptions {
 	@Valid
 	private String deleteObjectPath;
 
+	@Deprecated
+	public String getDownlodObjectPath() {
+		return downloadObjectPath;
+	}
+
+	@Deprecated
+	public void setDownlodObjectPath(String downlodObjectPath) {
+		this.downloadObjectPath = downlodObjectPath;
+	}
 
 
 }

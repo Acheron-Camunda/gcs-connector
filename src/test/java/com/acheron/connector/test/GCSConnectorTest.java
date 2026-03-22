@@ -1,21 +1,21 @@
 package com.acheron.connector.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Path;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.acheron.connector.GCSRequest;
 import com.acheron.connector.GCSResponse;
@@ -29,342 +29,184 @@ import com.acheron.connector.model.RequestOptions;
 import com.acheron.connector.util.GCSUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 
-import io.camunda.connector.api.error.ConnectorInputException;
-import io.camunda.connector.test.outbound.OutboundConnectorContextBuilder;
-import io.camunda.connector.test.outbound.OutboundConnectorContextBuilder.TestConnectorContext;
+import io.camunda.connector.api.outbound.OutboundConnectorContext;
+import jakarta.validation.Validation;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
-/**
- * @author PraveenKumarReddy
- *
- *The GCSConnectorTest test class which will contain test methods to test the application 
- */
-@ExtendWith(SystemStubsExtension.class)
+@ExtendWith({ SystemStubsExtension.class, MockitoExtension.class })
 class GCSConnectorTest {
+
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	@SystemStub
 	private EnvironmentVariables environmentVariables;
 
-	private static GCSUtil mockGcsUtil;
-	private static GCSUtil gcsUtil;
-	private static Storage mockStorage;
+	@Mock
+	private Storage storage;
 
-	@BeforeEach
-	public void setup() {
+	@Mock
+	private Blob blob;
 
-		// stubbing the environment variable to system
-		environmentVariables.set("JSON_CREDENTIALS_FILEPATH", "C:\\Google Cloud\\credentials.json");
+	private final GCSUtil gcsUtil = new GCSUtil();
 
-		// Initialize the mock objects
-		mockStorage = Mockito.mock(Storage.class);
-		mockGcsUtil = Mockito.mock(GCSUtil.class);
-
-		// Initialize the objects
-		gcsUtil = new GCSUtil();
-
-	}
-
-	@AfterEach
-	public void teardown() {
-		mockStorage = null;
-		mockGcsUtil = null;
-		gcsUtil = null;
-		environmentVariables = null;
-	}
-
-	/**
-	 * Test case to verify that the validation fails if inputs are missing in the GCSRequest.
-	 */
 	@Test
-	void shouldFailIfInputsAreMissing() throws JsonProcessingException {
-		// given
-		GCSRequest request = getGCSRequestWithNull();
+	void shouldFailIfInputsAreMissing() {
+		GCSRequest request = new GCSRequest(new Operation(), new RequestOptions());
+		var validator = Validation.byDefaultProvider().configure()
+				.messageInterpolator(new ParameterMessageInterpolator()).buildValidatorFactory().getValidator();
+		var violations = validator.validate(request);
 
-		String variablesAsJson = new ObjectMapper().writeValueAsString(request);
-
-		// when
-		TestConnectorContext context = OutboundConnectorContextBuilder.create().variables(variablesAsJson).build();
-
-		// then
-		assertThatThrownBy(() -> context.validate(request)).isInstanceOf(ConnectorInputException.class)
-				.hasMessageContaining(
-						"jakarta.validation.ValidationException: Found constraints violated while validating input:");
+		assertThat(violations).hasSize(2);
 	}
 
-
-	/**
-     * Test case to verify that the execute method of GoogleCloudStorageFunction returns the received message correctly after executing.
-	 */
-	
-	// This test method will directly perform operations to google cloud cloud so give proper inputs(actual filepaths, names) 
-
-//	@Test
-	void shouldReturnReceivedMessageWhenExecute() throws Exception {
-
-		// given
-
-		GCSRequest gcsRequest = getGCSrequest();
-		String variablesAsJson = new ObjectMapper().writeValueAsString(gcsRequest);
-		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
-		TestConnectorContext context = OutboundConnectorContextBuilder.create().variables(variablesAsJson).build();
-
-		// when
-		var result = function.execute(context);
-
-		// then
-		assertThat(result).isInstanceOf(GCSResponse.class).extracting("response")
-				.isEqualTo("File " + gcsRequest.getStorageOptions().getUploadFilePath() + " uploaded to bucket "
-						+ gcsRequest.getStorageOptions().getBucketName() +" folder " +gcsRequest.getStorageOptions().getUploadFolderName() + " as " + "SpringBoot.png");
-	}
-
-	/**
-	 *   Test case to verify the functionality of the uploadFile method in GCSUtil Class.
-	 */
 	@Test
-	void testUploadFileMethod() throws IOException {
+	void shouldAcceptLegacyDownloadObjectPathAlias() throws JsonProcessingException {
+		String variablesAsJson = """
+				{
+				  "operation": {
+				    "operationType": "DOWNLOAD_OBJECT"
+				  },
+				  "storageOptions": {
+				    "bucketName": "camunda-connector",
+				    "downloadFileDirectory": "src/test/resources/",
+				    "downlodObjectPath": "upload/download.png"
+				  }
+				}
+				""";
 
-		// given
-		GCSRequest gcsRequest = getGCSrequest();
-		GCSResponse expectedGcsResponse = new GCSResponse();
-		String fileName = "SpringBoot.png";
-		expectedGcsResponse.setResponse("File " + gcsRequest.getStorageOptions().getUploadFilePath() + " uploaded to bucket "
-				+ gcsRequest.getStorageOptions().getBucketName() +" folder " +gcsRequest.getStorageOptions().getUploadFolderName() + " as " + fileName);
+		GCSRequest request = OBJECT_MAPPER.readValue(variablesAsJson, GCSRequest.class);
 
-		when(mockGcsUtil.uploadFile(gcsRequest, mockStorage)).thenReturn(expectedGcsResponse);
-
-// Tried  actually creating the storage and tested it  as below 
-// It is directly performing operation to cloud so i'm going with the mockStorage for actualGcsResponse too
-//
-//		String jsonFilePath = System.getenv("JSON_CREDENTIALS_FILEPATH");
-//		FileInputStream serviceAccountStream = new FileInputStream(jsonFilePath);
-//		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream);
-//		Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-// 		GCSResponse actualGcsResponse = gcsUtil.uploadFile(gcsRequest, storage);
-
-		// when
-		GCSResponse actualGcsResponse = gcsUtil.uploadFile(gcsRequest, mockStorage);
-
-		// then
-		assertEquals(expectedGcsResponse, actualGcsResponse);
-
+		assertThat(request.getStorageOptions().getDownloadObjectPath()).isEqualTo("upload/download.png");
+		assertThat(request.getStorageOptions().getDownlodObjectPath()).isEqualTo("upload/download.png");
 	}
 
+	@Test
+	void testUploadFileMethod() throws Exception {
+		GCSRequest gcsRequest = getGcsRequest();
 
-	/**
-	 *   Test case to verify the functionality of the downloadFile method in GCSUtil Class.
-	 */
-	
-	// This test cannot be done with the mocked storage object like upload, so we need to do it with actual storage object with proper download inputs, JSON file path
+		GCSResponse actualGcsResponse = gcsUtil.uploadFile(gcsRequest, storage);
 
-//	@Test
-	void testDownloadFileMethod() throws IOException {
+		assertThat(actualGcsResponse.getResponse()).isEqualTo(
+				"File src/test/resources/SpringBoot.png uploaded to bucket camunda-connector folder upload/ as SpringBoot.png");
+		verify(storage).createFrom(any(), any(Path.class), any(Storage.BlobWriteOption.class));
+	}
 
-		// given
-		GCSRequest gcsRequest = getGCSrequest();
+	@Test
+	void testDownloadFileMethod() throws Exception {
+		GCSRequest gcsRequest = getGcsRequest();
 		gcsRequest.getOperation().setOperationType(OperationType.DOWNLOAD_OBJECT.toString());
-		GCSResponse expectedGcsResponse = new GCSResponse();
-		
-		String objectName = getObjectNam(gcsRequest.getStorageOptions().getDownlodObjectPath());
+		gcsRequest.getStorageOptions().setDownloadObjectPath("upload/missing-download.png");
+		gcsRequest.getStorageOptions().setDownloadFileDirectory("src/test/resources");
+		when(storage.get("camunda-connector", "upload/missing-download.png")).thenReturn(blob);
 
-		
-		expectedGcsResponse.setResponse("File " + objectName
-				+ " Downloaded to " + gcsRequest.getStorageOptions().getDownloadFileDirectory());
-
-		when(mockGcsUtil.downloadObject(gcsRequest, mockStorage)).thenReturn(expectedGcsResponse);
-
-		String jsonFilePath = System.getenv("JSON_CREDENTIALS_FILEPATH");
-
-		FileInputStream serviceAccountStream = new FileInputStream(jsonFilePath);
-		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream);
-		Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-
-		// when
 		GCSResponse actualGcsResponse = gcsUtil.downloadObject(gcsRequest, storage);
 
-//		GCSResponse actualGcsResponse = gcsUtil.downloadObject(gcsRequest, mockStorage);
-
-		// then
-		assertEquals(expectedGcsResponse, actualGcsResponse);
-
+		assertThat(actualGcsResponse.getResponse()).isEqualTo("File missing-download.png Downloaded to src/test/resources");
+		verify(blob).downloadTo(Path.of("src/test/resources", "missing-download.png"));
 	}
-	
-	/**
-	 *   Test case to verify the functionality of the deleteObject method in GCSUtil Class.
-	 */
- // This test cannot be done with the mocked storage object like upload so we need to do it with actual storage object with proper delete inputs,JSON key filePath
-//	@Test
-	void testDeleteObjectMethod() throws IOException {
 
-		// given
-		GCSRequest gcsRequest = getGCSrequest();
+	@Test
+	void testDeleteObjectMethod() {
+		GCSRequest gcsRequest = getGcsRequest();
 		gcsRequest.getOperation().setOperationType(OperationType.DELETE_OBJECT.toString());
+		when(storage.get("camunda-connector", "upload/SpringBoot.png")).thenReturn(blob);
+		when(blob.getGeneration()).thenReturn(1L);
 
-		GCSResponse expectedGcsResponse = new GCSResponse();
-
-		expectedGcsResponse.setResponse("Object " + gcsRequest.getStorageOptions().getDeleteObjectPath()
-				+ " was deleted from " + gcsRequest.getStorageOptions().getBucketName());
-
-		when(mockGcsUtil.deleteObject(gcsRequest, mockStorage)).thenReturn(expectedGcsResponse);
-
-		String jsonFilePath = System.getenv("JSON_CREDENTIALS_FILEPATH");
-		FileInputStream serviceAccountStream = new FileInputStream(jsonFilePath);
-		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream);
-		Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-
-		// when
 		GCSResponse actualGcsResponse = gcsUtil.deleteObject(gcsRequest, storage);
 
-		// then
-		assertEquals(expectedGcsResponse, actualGcsResponse);
-
+		assertThat(actualGcsResponse.getResponse())
+				.isEqualTo("Object upload/SpringBoot.png was deleted from camunda-connector");
+		verify(storage).delete(org.mockito.ArgumentMatchers.eq("camunda-connector"),
+				org.mockito.ArgumentMatchers.eq("upload/SpringBoot.png"), any(Storage.BlobSourceOption.class));
 	}
 
-	/**
-     * Test case to verify the behavior when attempting to give an object with an invalid name that is not present in GCS bucket.
-	 */
 	@Test
-	void testWithInvalidObjectName() throws IOException {
-		// given
-		GCSRequest gcsRequest = getGCSrequest();
+	void testWithInvalidObjectName() {
+		GCSRequest gcsRequest = getGcsRequest();
 		gcsRequest.getOperation().setOperationType(OperationType.DELETE_OBJECT.toString());
 		gcsRequest.getStorageOptions().setDeleteObjectPath("Invalid-folder/invalid.png");
 
-		String jsonFilePath = System.getenv("JSON_CREDENTIALS_FILEPATH");
-		FileInputStream serviceAccountStream = new FileInputStream(jsonFilePath);
-		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream);
-		Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-		
-		// then
-		assertThatThrownBy(() -> gcsUtil.deleteObject(gcsRequest,storage)).isInstanceOf(ObjectNotFoundException.class)
-		.hasMessageContaining("Object with name " + gcsRequest.getStorageOptions().getDeleteObjectPath() + " Not found in the bucket " + gcsRequest.getStorageOptions().getBucketName());
+		assertThatThrownBy(() -> gcsUtil.deleteObject(gcsRequest, storage)).isInstanceOf(ObjectNotFoundException.class)
+				.hasMessageContaining("Object with name Invalid-folder/invalid.png Not found in the bucket camunda-connector");
 	}
-	
-	
-	/**
-     * Test case to verify the behavior when providing an invalid file path for the JSON key file.
-	 */
+
 	@Test
-	void testWithInvalidFilePathforJsonKey() throws JsonProcessingException   {
-		// given
+	void testWithInvalidFilePathforJsonKey() throws JsonProcessingException {
 		environmentVariables.set("JSON_CREDENTIALS_FILEPATH", "src/test/resources/GCS-key.json");
-		GCSRequest gcsRequest = getGCSrequest();
+		GCSRequest gcsRequest = getGcsRequest();
 		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
-		
-		//when
-		TestConnectorContext context = OutboundConnectorContextBuilder.create()
-				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
+		OutboundConnectorContext context = mockContext(gcsRequest);
 
-		// then
 		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(FileNotFoundException.class);
-
 	}
-	
-	/**
-     * Test case to verify the behavior when providing invalid JSON credentials in the key file.
-	 */
+
 	@Test
 	void testWithInvalidJsonCredentialsInFile() throws JsonProcessingException {
-		// given
 		environmentVariables.set("JSON_CREDENTIALS_FILEPATH", "src/test/resources/key.json");
-		GCSRequest gcsRequest = getGCSrequest();
+		GCSRequest gcsRequest = getGcsRequest();
 		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
-		
-		// when
-		TestConnectorContext context = OutboundConnectorContextBuilder.create()
-				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
+		OutboundConnectorContext context = mockContext(gcsRequest);
 
-		// then
 		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(InvalidCredentialFileException.class)
-		.hasMessageContaining("Invalid credentials in the provided JSON File");
-
-		
+				.hasMessageContaining("Invalid credentials in the provided JSON File");
 	}
-	
-	
-	/**
-     * Test method to demonstrate handling scenarios when the specified directory does not exist.
-	 */
+
 	@Test
-	void testWithDirectoryNotFound() throws JsonProcessingException {
-		// given
-		GCSRequest gcsRequest = getGCSrequest();
+	void shouldPreferGoogleApplicationCredentialsWhenPresent() throws JsonProcessingException {
+		environmentVariables.set("GOOGLE_APPLICATION_CREDENTIALS", "src/test/resources/GCS-key.json");
+		environmentVariables.set("JSON_CREDENTIALS_FILEPATH", "src/test/resources/key.json");
+		GCSRequest gcsRequest = getGcsRequest();
+		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
+		OutboundConnectorContext context = mockContext(gcsRequest);
+
+		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(FileNotFoundException.class);
+	}
+
+	@Test
+	void testWithDirectoryNotFound() {
+		GCSRequest gcsRequest = getGcsRequest();
 		gcsRequest.getOperation().setOperationType(OperationType.DOWNLOAD_OBJECT.toString());
 		gcsRequest.getStorageOptions().setDownloadFileDirectory("src/Invalid-directory");
-		
-		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
-		
-		// when
-		TestConnectorContext context = OutboundConnectorContextBuilder.create()
-				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
+		when(storage.get("camunda-connector", "upload/download.png")).thenReturn(blob);
 
-		// then
-		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(DirectoryNotFoundException.class)
-		.hasMessageContaining("The provided directory " + gcsRequest.getStorageOptions().getDownloadFileDirectory() + " is not found in the file system");
-				
+		assertThatThrownBy(() -> gcsUtil.downloadObject(gcsRequest, storage)).isInstanceOf(DirectoryNotFoundException.class)
+				.hasMessageContaining("The provided directory src/Invalid-directory is not found in the file system");
+		verify(blob, never()).downloadTo(any(Path.class));
 	}
 
-	
-	/**
-     * Test method to demonstrate handling scenarios when a file with the same name already exists in the provided download directory.
-	 */
-	// This test needs  real  object  that is present in the bucket  
-//	@Test
-	void testWithFileAlreadyExists() throws JsonProcessingException {
-		// given
-		GCSRequest gcsRequest = getGCSrequest();
+	@Test
+	void testWithFileAlreadyExists() {
+		GCSRequest gcsRequest = getGcsRequest();
 		gcsRequest.getOperation().setOperationType(OperationType.DOWNLOAD_OBJECT.toString());
-		
-		GoogleCloudStorageFunction function = new GoogleCloudStorageFunction();
-      
-		String objectName = getObjectNam(gcsRequest.getStorageOptions().getDownlodObjectPath());
-		
-		// when
-		TestConnectorContext context = OutboundConnectorContextBuilder.create()
-				.variables(new ObjectMapper().writeValueAsString(gcsRequest)).build();
+		when(storage.get("camunda-connector", "upload/download.png")).thenReturn(blob);
 
-		// then
-		assertThatThrownBy(() -> function.execute(context)).isInstanceOf(FileAlreadyExistsException.class)
-		.hasMessageContaining("File with name " + objectName + " already exists in directory " + gcsRequest.getStorageOptions().getDownloadFileDirectory());
-		
-
-		
+		assertThatThrownBy(() -> gcsUtil.downloadObject(gcsRequest, storage)).isInstanceOf(FileAlreadyExistsException.class)
+				.hasMessageContaining("File with name download.png already exists in directory src/test/resources/");
+		verify(blob, never()).downloadTo(any(Path.class));
 	}
 
-	GCSRequest getGCSrequest() {
-
+	private GCSRequest getGcsRequest() {
 		Operation operation = new Operation(OperationType.UPLOAD_OBJECT.toString());
-		RequestOptions storage = new RequestOptions();
-		storage.setUploadFilePath("src/test/resources/SpringBoot.png");
-		storage.setUploadFolderName("upload/");
-		storage.setBucketName("camunda-connector");
-		storage.setDownloadFileDirectory("src/test/resources/");
-		storage.setDownlodObjectPath("upload/download.png");
-		storage.setDeleteObjectPath("upload/SpringBoot.png");
-		
-		return new GCSRequest(operation, storage);
+		RequestOptions storageOptions = new RequestOptions();
+		storageOptions.setUploadFilePath("src/test/resources/SpringBoot.png");
+		storageOptions.setUploadFolderName("upload/");
+		storageOptions.setBucketName("camunda-connector");
+		storageOptions.setDownloadFileDirectory("src/test/resources/");
+		storageOptions.setDownloadObjectPath("upload/download.png");
+		storageOptions.setDeleteObjectPath("upload/SpringBoot.png");
 
-	}
-	
-	GCSRequest getGCSRequestWithNull() {
-
-		Operation operation = new Operation();
-		RequestOptions storage = new RequestOptions();
-
-		return new GCSRequest(operation, storage);
+		return new GCSRequest(operation, storageOptions);
 	}
 
-	
-	String getObjectNam(String downloadObjectPath) {
-		String[] parts=downloadObjectPath.split("/");
-		return  parts[parts.length - 1];
-		
+	private OutboundConnectorContext mockContext(GCSRequest gcsRequest) {
+		OutboundConnectorContext context = Mockito.mock(OutboundConnectorContext.class);
+		when(context.bindVariables(GCSRequest.class)).thenReturn(gcsRequest);
+		return context;
 	}
-
-
 }

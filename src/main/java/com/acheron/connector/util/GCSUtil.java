@@ -127,7 +127,7 @@ public class GCSUtil {
 
 		String downloadFileDirectory = connectorRequest.getStorageOptions().getDownloadFileDirectory();
 
-		String downloadObjectPath = connectorRequest.getStorageOptions().getDownlodObjectPath();
+		String downloadObjectPath = connectorRequest.getStorageOptions().getDownloadObjectPath();
 
 		String[] parts = downloadObjectPath.split("/");
 		String objectName = parts[parts.length - 1];

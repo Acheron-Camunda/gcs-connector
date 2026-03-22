@@ -2,6 +2,15 @@
 
 A Camunda outbound connector to connect with the Google Cloud Storage and perform operations with it
 
+## Version Alignment
+
+This project is aligned to Camunda Platform `8.8.14`.
+
+- Camunda Platform target: `8.8.14`
+- Camunda connector SDK/runtime artifacts used by this project: `8.8.8`
+
+The connector SDK artifacts (`connector-runtime-core`, `connector-validation`, and `connector-test`) are pinned to `8.8.8` because that is the newest published `8.8.x` connector artifact line available from Maven Central for custom connector builds. The BPMN metadata and project support target remain aligned to Camunda Platform `8.8.14`.
+
 ## GCS Connector Operations
 
 | Operation           | Functionality                                             |
@@ -48,7 +57,7 @@ A Camunda outbound connector to connect with the Google Cloud Storage and perfor
 | `downloadObjectPath`    | Absolute path of the object to be downloaded from the bucket.    | `/your-folder/sub-folder/SpringBoot.png`|
 | `deleteObjectPath`      | Absolute path of the object to be deleted from GCS bucket        | `/your-folder/sub-folder/SpringBoot.png`|
 
-**Note:**  The GCS connector doesn't require secret inputs. Instead, it operates by taking the path of the credential JSON key file as an environment variable.
+**Note:** The GCS connector doesn't require secret inputs. It prefers the standard `GOOGLE_APPLICATION_CREDENTIALS` environment variable and still accepts `JSON_CREDENTIALS_FILEPATH` as a backward-compatible fallback.
 
 The configuration for each operation in Modeler appears as follows:
 ### Upload file
@@ -70,9 +79,9 @@ mvn clean package
 Build an image by using the Dockerfile 
 
 ```Dockerfile
-FROM camunda/connectors:8.5.0
+FROM camunda/connectors:8.8.8
 
-COPY target/google-cloud-storage-jar-with-dependencies.jar /opt/app/
+COPY target/google-cloud-storage.jar /opt/app/
 ```
 Command for Building an Image 
 
@@ -91,7 +100,20 @@ docker build -t gcs-connector .
 - Ensure that the local storage you're mounting includes the necessary JSON credential file.
 
 - Please note that the ability to upload files is limited to those present either within the mounted volume or stored directly within the container.
-- You can utilize the `docker-compose.yaml` file to start a local connector runtime.
+- You can utilize the `docker-compose.yml` file to start a local connector runtime.
+
+Environment variables for the runtime should use the Spring-compatible underscore form, for example:
+
+```yaml
+environment:
+  - ZEEBE_CLIENT_BROKER_GATEWAY_ADDRESS=zeebe:26500
+  - ZEEBE_CLIENT_SECURITY_PLAINTEXT=true
+  - CAMUNDA_CONNECTOR_POLLING_ENABLED=false
+  - CAMUNDA_CONNECTOR_WEBHOOK_ENABLED=false
+  - SPRING_MAIN_WEB_APPLICATION_TYPE=none
+  - OPERATE_CLIENT_ENABLED=false
+  - GOOGLE_APPLICATION_CREDENTIALS=/opt/secrets/gcs-key.json
+```
 
 ## Sample BPMN
 

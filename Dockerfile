@@ -1,2 +1,2 @@
-FROM camunda/connectors:8.5.0
-COPY target/google-cloud-storage-jar-with-dependencies.jar /opt/app/
+FROM camunda/connectors:8.8.8
+COPY target/google-cloud-storage.jar /opt/app/

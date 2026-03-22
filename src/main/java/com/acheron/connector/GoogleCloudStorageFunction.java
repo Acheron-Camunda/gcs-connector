@@ -40,7 +40,7 @@ public class GoogleCloudStorageFunction implements OutboundConnectorFunction {
 
 		final var connectorRequest = context.bindVariables(GCSRequest.class);
 
-		String jsonFilePath= System.getenv("JSON_CREDENTIALS_FILEPATH");
+		String jsonFilePath = resolveCredentialsPath();
 
 		GCSUtil gcsUtil = new GCSUtil();
 		
@@ -49,6 +49,15 @@ public class GoogleCloudStorageFunction implements OutboundConnectorFunction {
 		LOGGER.info("GCSResponse {}", gcsResponse);
 
 		return gcsResponse;
+	}
+
+	private String resolveCredentialsPath() {
+		String googleApplicationCredentials = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+		if (googleApplicationCredentials != null && !googleApplicationCredentials.isBlank()) {
+			return googleApplicationCredentials;
+		}
+
+		return System.getenv("JSON_CREDENTIALS_FILEPATH");
 	}
 	/**
 	 * Executes the Google Cloud Storage (GCS) operation based on the provided GCS request and Storage instance.
